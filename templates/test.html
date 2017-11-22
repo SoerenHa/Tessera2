@@ -1,0 +1,27 @@
+<body>
+    <div class="inputContainer">
+        <select id="entityType">
+            <option value="default">Select type</option>
+            {{range .BaseEntities}}
+                <option value="{{.Name}}">{{.Name}}</option>
+            {{end}}
+        </select>
+
+        <select id="entityRoom">
+            <option value="default">Select room</option>
+            {{range .Rooms}}
+                <option value="{{.Type}}">{{.Type}}</option>
+            {{end}}
+        </select>
+
+        <label>
+            Name:
+            <input type="text" id="entityName" required>
+        </label>
+
+        <input type="button" id="createEntity" value="Create">
+    </div>
+
+    <script type="text/javascript" src="/static/js/main.js"></script>
+
+</body>
