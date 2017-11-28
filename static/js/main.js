@@ -11,17 +11,38 @@
 
     /****************************** Events ******************************/
 
-    select('#createEntity').onclick = function () {
-        var type = select('#entityType').value;
-        var room = select('#entityRoom').value;
-        var name = select('#entityName').value;
+    select('#createRoom').onclick = function() {
+        let room = select('#roomName').value;
+        let infoSpan = select('#roomInfo');
 
-        if ( type != 'deafult' && room != 'default' && name != '' ) {
-            var data = {
-                type: type,
+        if ( room !== '') {
+            let data = {
                 room: room,
+                action: 'insertRoom'
+            };
+
+            ajax({
+                method:     'POST',
+                data:       data,
+                success:    function (model) {
+                    showInfo(infoSpan, 'Room inserted');
+                }
+            })
+        } else {
+            showInfo(infoSpan, 'Please enter a room');
+        }
+    };
+
+    select('#createDevice').onclick = function() {
+        let type = select('#deviceType').value;
+        let name = select('#deviceName').value;
+        let infoSpan = select('#deviceInfo');
+
+        if ( type !== 'default' && name !== '' ) {
+            let data = {
+                type: type,
                 name: name,
-                action: "insertRoom"
+                action: "insertDevice"
             };
 
             ajax({
@@ -29,12 +50,14 @@
                 uri:    '',
                 data:   data,
                 success: function(model) {
-                    console.log(model);
+                    let text = "Insertion was successfull";
+                    showInfo(infoSpan, text);
                 }
             });
-        } else {
-            // Fehlermeldung
-            return;
+        } else if ( type === 'default' ) {
+            showInfo(infoSpan, 'Please select a device');
+        } else if ( name === '' ) {
+            showInfo(infoSpan, 'Please input a name');
         }
     };
 
@@ -44,20 +67,20 @@
         // http://stackoverflow.com/a/15096979/570336
         // Input: { a = "foo", b = 123 }
         // Output: a=foo&b=123
-        var serialize = function (obj) {
-            var str = [];
-            for (var p in obj) {
+        let serialize = function (obj) {
+            let str = [];
+            for (let p in obj) {
                 if (obj.hasOwnProperty(p)) {
                     str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
                 }
             }
             return str.join("&");
-        }
+        };
 
-        var xhttp = new XMLHttpRequest();
+        let xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
             if (this.readyState === 4) {
-                var model = JSON.parse(this.responseText);
+                let model = JSON.parse(this.responseText);
                 if (this.status === 200) {
                     config.success(model);
                 } else {
@@ -66,7 +89,19 @@
             }
         };
 
+        if ( config.uri === undefined) {
+            config.uri = '';
+        }
+
         xhttp.open(config.method || "GET", config.uri + "?" + serialize(config.params), true);
         xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhttp.send(serialize(config.data));
+    }
+
+    // Adds text to an element and removes it after a short time
+    function showInfo(element, text) {
+        element.innerText = text;
+        setTimeout( _ => {
+            element.innerText = "";
+        }, 3000);
     }

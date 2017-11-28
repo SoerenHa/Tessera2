@@ -13,9 +13,9 @@ import (
 )
 
 type User struct {
+	Id			bson.ObjectId
 	Username 	string
 	Password	string
-	ID			bson.ObjectId
 }
 
 type Entity struct {
@@ -26,12 +26,19 @@ type Entity struct {
 	User 	string
 }
 
-type BaseEntity struct {
+type BaseDevice struct {
+	Id		bson.ObjectId `json:"id"`
+	Name	string
+}
+
+type Device struct {
+	Id		bson.ObjectId
 	Name	string
 }
 
 type Room struct {
-	Type	string
+	Id		bson.ObjectId
+	Name	string
 }
 
 const DB = "tohuus"
@@ -41,13 +48,49 @@ var Err error
 func Connect(url string) {
 	MongoSession, Err = mgo.Dial(url)
 
+	MongoSession.SetMode(mgo.Monotonic, true)
+
+	// Make sure that The baseDevices and user smarty are available
+	c := MongoSession.DB(DB).C("baseDevice")
+	count, _ := c.Find(nil).Count()
+
+	if count < 1 {
+
+		light := Device{
+			Id:		bson.NewObjectId(),
+			Name:	"Light",
+		}
+
+		shutter := Device{
+			Id:		bson.NewObjectId(),
+			Name:	"Shutter",
+		}
+
+		coffeeMachine := Device{
+			Id:		bson.NewObjectId(),
+			Name:	"Coffee machine",
+		}
+
+		Err = c.Insert(light, shutter, coffeeMachine)
+	}
+
+	c = MongoSession.DB(DB).C("user")
+
+	smarty, _ := c.Find(bson.M{"username": "smarty"}).Count()
+
+	if smarty == 0 {
+		Err = c.Insert(User{
+			Id:			bson.NewObjectId(),
+			Username:	"smarty",
+			Password:	"123",
+		})
+	}
+
 	if Err != nil {
 		panic(Err)
 	} else {
 		fmt.Println("Connected!")
 	}
-
-	MongoSession.SetMode(mgo.Monotonic, true)
 
 }
 
@@ -61,7 +104,7 @@ func InsertUser (username, password string) {
 	fmt.Println(Err)
 
 	if Err != nil {
-		Err = c.Insert(&User{Username: username, Password: password, ID: bson.NewObjectId()})
+		Err = c.Insert(&User{Username: username, Password: password, Id: bson.NewObjectId()})
 		fmt.Println(Err)
 
 	}
@@ -70,50 +113,76 @@ func InsertUser (username, password string) {
 	}
 }
 
-func GetBaseEntities () []BaseEntity  {
-	c := MongoSession.DB(DB).C("baseEntities")
+func GetBaseDevices () []BaseDevice {
+	c := MongoSession.DB(DB).C("baseDevice")
 
-	var names []BaseEntity
-	Err := c.Find(nil).Select(bson.M{"name": 1}).All(&names)
+	var devices []BaseDevice
+	Err := c.Find(nil).All(&devices)
 
 	if Err != nil {
 
 	}
 
-	return  names
+	return  devices
 }
 
 func GetRooms () []Room {
-	c := MongoSession.DB(DB).C("room")
+	c := MongoSession.DB(DB).C("user")
 
+	user := getUser()
 	var rooms []Room
-	Err := c.Find(nil).Select(bson.M{"type": 1}).All(&rooms)
+	var haha = c.Find(bson.M{"username": user}).Select(bson.M{"room":1})
 
 	if Err != nil {
-
 	}
+
+	fmt.Print(haha)
 
 	return  rooms
 }
 
 func getUser () string {
-	return "Test"
+	return "smarty"
 }
 
-func InsertRoom () bool {
+func InsertRoom (room string) bool {
+	c := MongoSession.DB(DB).C("user")
+
+	user := getUser()
+	roomStruct := Room {
+		Id:		bson.NewObjectId(),
+		Name:	room,
+	}
+
+	query 	:= bson.M{"username": user}
+	change 	:= bson.M{"$addToSet": bson.M{"room": roomStruct}}
+
+	Err := c.Update(query, change)
+
+	if Err != nil {
+		fmt.Println(Err.Error())
+	}
+
+	return true
+}
+
+func InsertDevice (device string) bool {
 	c := MongoSession.DB("test").C("coll")
 
+	user := getUser()
+	deviceStruct := Room {
+		Id:		bson.NewObjectId(),
+		Name:	device,
+	}
 
-	//if (Room{}) != r {
-		query 	:= bson.M{"user": "test"}
-		change 	:= bson.M{"$addToSet": bson.M{"rooms": "Fickraum1"}}
+	query 	:= bson.M{"user": user}
+	change 	:= bson.M{"$addToSet": bson.M{"device": deviceStruct}}
 
-		Err := c.Update(query, change)
+	Err := c.Update(query, change)
 
-		if Err != nil {
-			fmt.Println(Err.Error())
-		}
-	//}
+	if Err != nil {
+		fmt.Println(Err.Error())
+	}
 
 	return true
 }
@@ -140,8 +209,23 @@ func GetRandomName() string {
 	return buffer.String()
 }
 
-func insertEntity (entity Entity) {
-	c := MongoSession.DB(DB).C("Entity")
+func InsertEntity () {
+	c := MongoSession.DB(DB).C("baseDevice")
 
-	Err = c.Insert(entity)
+	Err = c.Insert(BaseDevice{
+		Id: 	bson.NewObjectId(),
+		Name:	"Light",
+	},
+		BaseDevice{
+			Id: 	bson.NewObjectId(),
+			Name:	"Shutter",
+		},
+		BaseDevice{
+			Id: 	bson.NewObjectId(),
+			Name:	"Coffee machine",
+		})
+
+	if Err != nil {
+		fmt.Printf(Err.Error())
+	}
 }

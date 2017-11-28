@@ -24,6 +24,7 @@ func main() {
 		log.Fatal("ListenAndServe: ", err)
 	}
 
+
 }
 
 
@@ -47,7 +48,7 @@ type HeadTemplate struct {
 }
 
 type BodyTemplate struct {
-	BaseEntities	[]crud.BaseEntity
+	BaseEntities	[]crud.BaseDevice
 	Rooms			[]crud.Room
 }
 
@@ -84,11 +85,11 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 func test(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
-		entities :=crud.GetBaseEntities()
+		devices :=crud.GetBaseDevices()
 		rooms := crud.GetRooms()
 
 		myTemplates.ExecuteTemplate(w, "head.html", HeadTemplate{})
-		myTemplates.ExecuteTemplate(w, "test.html", BodyTemplate{entities, rooms})
+		myTemplates.ExecuteTemplate(w, "test.html", BodyTemplate{devices, rooms})
 		myTemplates.ExecuteTemplate(w, "foot.html", BodyTemplate{})
 	}
 
@@ -105,11 +106,17 @@ func test(w http.ResponseWriter, r *http.Request) {
 
 		switch action {
 		case "insertRoom":
-			crud.InsertRoom()
+			room := r.FormValue("room")
+			success := crud.InsertRoom(room)
+
+			if success {
+
+			}
 
 			break
-		case "insertPorn":
-
+		case "insertDevice":
+			device := r.FormValue("deviceName")
+			crud.InsertDevice(device)
 			break
 
 		}

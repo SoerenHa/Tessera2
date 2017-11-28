@@ -1,25 +1,35 @@
 <body>
+    <!-- Room Inputs -->
     <div class="inputContainer">
-        <select id="entityType">
-            <option value="default">Select type</option>
-            {{range .BaseEntities}}
-                <option value="{{.Name}}">{{.Name}}</option>
-            {{end}}
+        <span class="containerHead">Rooms</span>
+
+        <ul id="roomList">
+        {{range .Rooms}}
+            <li>
+                <input type="text"  data-value="{{.Id.Hex}}" value="{{.Name}}" readonly>
+            </li>
+        {{end}}
+        </ul>
+
+        <label for="roomName">Room name:</label>
+        <input type="text" id="roomName" required>
+        <input type="button" id="createRoom" value="Create room">
+        <span id="roomInfo" class="info"></span>
+    </div>
+
+    <!-- Device Inputs -->
+    <div class="inputContainer">
+        <label for="deviceType">Choose type:</label>
+        <select id="deviceType">
+            <option value="default">Select device</option>
+        {{range .BaseEntities}}
+            <option value="{{.Id.Hex}}">{{.Name}}</option>
+        {{end}}
         </select>
-
-        <select id="entityRoom">
-            <option value="default">Select room</option>
-            {{range .Rooms}}
-                <option value="{{.Type}}">{{.Type}}</option>
-            {{end}}
-        </select>
-
-        <label>
-            Name:
-            <input type="text" id="entityName" required>
-        </label>
-
-        <input type="button" id="createEntity" value="Create">
+        <label for="deviceName">Device name:</label>
+        <input type="text" id="deviceName" required>
+        <input type="button" id="createDevice" value="Create device">
+        <span id="deviceInfo" class="info"></span>
     </div>
 
     <script type="text/javascript" src="/static/js/main.js"></script>

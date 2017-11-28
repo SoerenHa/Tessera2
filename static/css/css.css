@@ -1,7 +1,31 @@
+* {
+    font-family: Helvetica, Arial, sans-serif;
+    box-sizing: border-box;
+}
+
 .inputContainer {
     display: flex;
+    flex-direction: column;
+
+    width: 200px;
+    padding: 5px;
+    margin: 5px;
+    border: 2px solid black;
+    border-radius: 5px;
+
     background-color: #a0b4b2;
     
+}
+
+.info {
+    background-color: peachpuff;
+    text-align: center;
+}
+
+.containerHead {
+    text-align: center;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 1.5em;
 }
 
 body {
