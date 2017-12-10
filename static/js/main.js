@@ -11,27 +11,28 @@
 
     /****************************** Events ******************************/
 
-    select('#createRoom').onclick = function() {
-        let room = select('#roomName').value;
-        let infoSpan = select('#roomInfo');
-
-        if ( room !== '') {
-            let data = {
-                room: room,
-                action: 'insertRoom'
-            };
-
-            ajax({
-                method:     'POST',
-                data:       data,
-                success:    function (model) {
-                    showInfo(infoSpan, 'Room inserted');
-                }
-            })
-        } else {
-            showInfo(infoSpan, 'Please enter a room');
-        }
-    };
+    // select('#createRoom').onclick = function() {
+    //     let room = select('#roomName').value;
+    //     let infoSpan = select('#roomInfo');
+    //
+    //     if ( room !== '') {
+    //         let data = {
+    //             room: room,
+    //             action: 'insertRoom'
+    //         };
+    //
+    //         ajax({
+    //             method:     'POST',
+    //             data:       data,
+    //             success:    function (model) {
+    //                 showInfo(infoSpan, 'Room inserted');
+    //                 updateRooms();
+    //             }
+    //         })
+    //     } else {
+    //         showInfo(infoSpan, 'Please enter a room');
+    //     }
+    // };
 
     select('#createDevice').onclick = function() {
         let type = select('#deviceType').value;
@@ -80,6 +81,8 @@
         let xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
             if (this.readyState === 4) {
+                // let str = String.fromCharCode.apply(String, this.responseText);
+                console.log(typeof(this.responseText));
                 let model = JSON.parse(this.responseText);
                 if (this.status === 200) {
                     config.success(model);
@@ -104,4 +107,38 @@
         setTimeout( _ => {
             element.innerText = "";
         }, 3000);
+    }
+
+    function updateRooms() {
+        console.log("Updating rooms");
+        ajax({
+            method: 'POST',
+            uri:    '',
+            data:   {action: "getRooms"},
+            success: function(rooms) {
+                let list = select('#roomList');
+                removeChildren(list);
+                rooms.forEach(element => {
+                    let tag = '<li><input data-value="' + element.id + '" value="' + element.name + '" readonly="" type="text"></li>';
+                    let test = getNewElement(tag);
+                    console.log(test);
+                    list.appendChild(test);
+                });
+            }
+        });
+    }
+
+    // removes all children from an element
+    function removeChildren(parent) {
+        while (parent.firstChild) {
+            parent.removeChild(parent.firstChild);
+        }
+    }
+
+    // Returns a HTML element created from a string
+    // https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro
+    function getNewElement(string) {
+        let div = document.createElement('div');
+        div.innerHTML = string;
+        return div.firstChild;
     }

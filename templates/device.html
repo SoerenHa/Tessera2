@@ -1,0 +1,18 @@
+<div class="device">
+    {{if ( eq .Type "5a2c4464013c35122045d9a1") }}
+        <span>Light</span>
+        <span>
+            {{.Name}}
+        </span>
+    {{else if ( eq .Type "5a2c4464013c35122045d9a2") }}
+        <span>Shutter</span>
+        <span>
+            {{.Name}}
+        </span>
+    {{else if ( eq .Type "5a2c4464013c35122045d9a3") }}
+        <span>Coffee machine</span>
+        <span>
+            {{.Name}}
+        </span>
+    {{end}}
+</div>

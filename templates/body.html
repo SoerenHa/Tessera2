@@ -1,0 +1,48 @@
+<body>
+    <div id="sideBar">
+        <!-- Room Inputs -->
+        <div class="inputContainer">
+            <span class="containerHead">Rooms</span>
+            <form method="post">
+                <input type="hidden" name="action" value="insertRoom">
+                <label for="roomName">Room name:</label>
+                <input type="text" name="room" required>
+                <input type="submit" value="Create room">
+            </form>
+        </div>
+
+        <!-- Device Inputs -->
+        <div class="inputContainer">
+            <span class="containerHead">Add device</span>
+            <form method="post">
+                <input type="hidden" name="action" value="insertDevice">
+                <label for="deviceType">Choose type:</label>
+                <select id="deviceType" name="deviceType" required>
+                    <option value="default">Select device</option>
+                    {{range .BaseEntities}}
+                        <option value="{{.Id.Hex}}">{{.Name}}</option>
+                    {{end}}
+                </select>
+
+                <label for="deviceRoom">Choose room:</label>
+                <select id="deviceRoom" name="deviceRoom" required>
+                    <option value="default">Select room</option>
+                    {{range .Rooms}}
+                        <option value="{{.Id.Hex}}">{{.Name}}</option>
+                    {{end}}
+                </select>
+                <label for="deviceName">Device name:</label>
+                <input type="text" id="deviceName" name="deviceName" required>
+                <input type="submit" value="Create device">
+            </form>
+        </div>
+    </div>
+
+    <div id="content">
+        {{range .Rooms}}
+            {{template "room.html" .}}
+        {{end}}
+    </div>
+
+    <script type="text/javascript" src="/static/js/main.js"></script>
+</body>

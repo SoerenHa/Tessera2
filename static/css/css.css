@@ -3,18 +3,46 @@
     box-sizing: border-box;
 }
 
-.inputContainer {
-    display: flex;
-    flex-direction: column;
+body {
+    position: relative;
+}
 
+.inputContainer {
     width: 200px;
     padding: 5px;
     margin: 5px;
     border: 2px solid black;
     border-radius: 5px;
+    background-color: #a0b4b2;
+}
+
+.inputContainer input, select {
+    width: 100%;
+}
+
+.roomContainer {
+    width: 200px;
+    padding: 5px;
+    border: 2px solid black;
+    border-radius: 5px;
+
+    margin: 5px;
 
     background-color: #a0b4b2;
-    
+}
+
+#content {
+    position: absolute;
+    left: 200px;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+#sideBar {
+    position: absolute;
+    left: 0;
 }
 
 .info {

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 	"github.com/SoerenHa/crud"
+	"fmt"
 )
 
 func main() {
@@ -52,6 +53,11 @@ type BodyTemplate struct {
 	Rooms			[]crud.Room
 }
 
+type RoomTemplate struct {
+	RoomId		string
+	RoomName	string
+}
+
 type Test struct {
 	Name	string
 }
@@ -60,9 +66,9 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	requestedPath := r.URL.Path[1:]
 
 	switch requestedPath {
-	case "test":
-		test(w, r)
-		break
+		case "test":
+			test(w, r)
+			break
 	}
 }
 
@@ -88,8 +94,9 @@ func test(w http.ResponseWriter, r *http.Request) {
 		devices :=crud.GetBaseDevices()
 		rooms := crud.GetRooms()
 
+
 		myTemplates.ExecuteTemplate(w, "head.html", HeadTemplate{})
-		myTemplates.ExecuteTemplate(w, "test.html", BodyTemplate{devices, rooms})
+		myTemplates.ExecuteTemplate(w, "body.html", BodyTemplate{devices, rooms})
 		myTemplates.ExecuteTemplate(w, "foot.html", BodyTemplate{})
 	}
 
@@ -99,6 +106,7 @@ func test(w http.ResponseWriter, r *http.Request) {
 		}
 		resp.success = "ok"
 
+		//var resp []byte
 
 		r.ParseForm()
 
@@ -107,24 +115,35 @@ func test(w http.ResponseWriter, r *http.Request) {
 		switch action {
 		case "insertRoom":
 			room := r.FormValue("room")
-			success := crud.InsertRoom(room)
-
-			if success {
-
-			}
+			crud.InsertRoom(room)
+			http.Redirect(w, r, "http://localhost:9090/test", http.StatusFound)
+			break
+		case "deleteRoom":
+			crud.DeleteRoom(r.FormValue("room"))
+			http.Redirect(w, r, "http://localhost:9090/test", http.StatusFound)
 
 			break
 		case "insertDevice":
 			device := r.FormValue("deviceName")
-			crud.InsertDevice(device)
+			deviceType := r.FormValue("deviceType")
+			room := r.FormValue("deviceRoom")
+
+			crud.InsertDevice(device, deviceType, room)
+			http.Redirect(w, r, "http://localhost:9090/test", http.StatusFound)
+
 			break
+		case "getRooms":
+			fmt.Print("Request")
+			rooms := crud.GetRoomJson()
+			fmt.Print(rooms)
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(rooms)
+
 
 		}
 
 
-		js, _ := json.Marshal(resp)
 
-		w.Write(js)
 
 		//fmt.Fprint(w, resp.success)
 	}

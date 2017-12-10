@@ -1,0 +1,13 @@
+<div class="roomContainer">
+    <form method="post">
+        <input type="hidden" name="room" value="{{.Id.Hex}}">
+        <input type="hidden" name="action" value="deleteRoom">
+        <input type="submit" value="X">
+    </form>
+    <span class="containerHead">{{.Name}}</span>
+    <ul class="devices">
+        {{range .Device}}
+            <li>{{template "device.html" .}}</li>
+        {{end}}
+    </ul>
+</div>
