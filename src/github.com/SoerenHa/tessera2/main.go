@@ -24,8 +24,6 @@ func main() {
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
-
-
 }
 
 
@@ -49,7 +47,7 @@ type HeadTemplate struct {
 }
 
 type BodyTemplate struct {
-	BaseEntities	[]crud.BaseDevice
+	BaseDevices		[]crud.BaseDevice
 	Rooms			[]crud.Room
 }
 
@@ -74,26 +72,12 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 
 /* Handler Functions **********************************************************/
 
-//func mainMenu(w http.ResponseWriter, r *http.Request) {
-//	if r.Method == "GET" {
-//		if checkLogInStatus(r) {
-//			myTemplates.ExecuteTemplate(w, "head.html", HeadTemplate{Title: "tessera Menu"})
-//			myTemplates.ExecuteTemplate(w, "mainMenu.html", BodyTemplate{Username: getUsername(r)})
-//		} else {
-//			myTemplates.ExecuteTemplate(w, "head.html", HeadTemplate{Title: "tessera Menu"})
-//			myTemplates.ExecuteTemplate(w, "home.html", BodyTemplate{})
-//		}
-//
-//	}
-//
-//}
 
 func test(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
 		devices :=crud.GetBaseDevices()
 		rooms := crud.GetRooms()
-
 
 		myTemplates.ExecuteTemplate(w, "head.html", HeadTemplate{})
 		myTemplates.ExecuteTemplate(w, "body.html", BodyTemplate{devices, rooms})
@@ -105,8 +89,6 @@ func test(w http.ResponseWriter, r *http.Request) {
 			success string
 		}
 		resp.success = "ok"
-
-		//var resp []byte
 
 		r.ParseForm()
 
@@ -143,10 +125,6 @@ func test(w http.ResponseWriter, r *http.Request) {
 			device := r.FormValue("device")
 			state := r.FormValue("state")
 
-			fmt.Println(room)
-			fmt.Println(device)
-			fmt.Println(state)
-
 			crud.UpdateState(room, device, state)
 			w.Header().Set("Content-Type", "application/json")
 
@@ -159,11 +137,6 @@ func test(w http.ResponseWriter, r *http.Request) {
 			break
 
 		}
-
-
-
-
-		//fmt.Fprint(w, resp.success)
 	}
 }
 

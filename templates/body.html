@@ -19,8 +19,8 @@
                 <label for="deviceType">Choose type:</label>
                 <select id="deviceType" name="deviceType" required>
                     <option value="default">Select device</option>
-                    {{range .BaseEntities}}
-                        <option value="{{.Id.Hex}}">{{.Name}}</option>
+                    {{range .BaseDevices}}
+                        <option value="{{.Type}}">{{.Type}}</option>
                     {{end}}
                 </select>
 

@@ -1,15 +1,15 @@
 <div class="device">
-    {{if ( eq .Type "5a2dcba6013c351964f4bfd3") }}
+    {{if ( eq .Type "Light") }}
         <data value="{{.Id.Hex}}"></data>
         <div class="deviceOptions">
             <div>{{.Name}}</div>
-            <input type="range" class="lightSlider" min="0" max="100" step="1">
+            <input type="range" class="lightSlider" min="0" max="100" step="1" value="{{.State}}">
         </div>
 
         <div class="deviceStatus">
             <div class="light"></div>
         </div>
-    {{else if ( eq .Type "5a2dcba6013c351964f4bfd4") }}
+    {{else if ( eq .Type "Shutter") }}
         <div class="deviceOptions">
             <div>{{.Name}}</div>
             <input type="range" class="shutterSlider" min="0" max="100" step="1">
@@ -18,7 +18,7 @@
         <div class="deviceStatus">
             <div class="shutter"></div>
         </div>
-    {{else if ( eq .Type "5a2dcba6013c351964f4bfd35") }}
+    {{else if ( eq .Type "Coffee machine") }}
         <div>{{.Name}}</div>
         <div>
             <select>

@@ -8,21 +8,18 @@ import (
 	"fmt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"math/rand"
-	"bytes"
 	"encoding/json"
+	"strconv"
 )
 
 type User struct {
-	Id			bson.ObjectId
 	Username 	string
 	Password	string
 	Room		[]Room
 }
 
 type BaseDevice struct {
-	Id		bson.ObjectId `json:"id"`
-	Name	string
+	Type	string `bson:"type"`
 }
 
 type Device struct {
@@ -57,19 +54,16 @@ func Connect(url string) {
 
 	if count < 1 {
 
-		light := Device{
-			Id:		bson.NewObjectId(),
-			Name:	"Light",
+		light := BaseDevice{
+			Type:	"Light",
 		}
 
-		shutter := Device{
-			Id:		bson.NewObjectId(),
-			Name:	"Shutter",
+		shutter := BaseDevice{
+			Type:	"Shutter",
 		}
 
-		coffeeMachine := Device{
-			Id:		bson.NewObjectId(),
-			Name:	"Coffee machine",
+		coffeeMachine := BaseDevice{
+			Type:	"Coffee machine",
 		}
 
 		Err = c.Insert(light, shutter, coffeeMachine)
@@ -81,7 +75,6 @@ func Connect(url string) {
 
 	if smarty == 0 {
 		Err = c.Insert(User{
-			Id:			bson.NewObjectId(),
 			Username:	"smarty",
 			Password:	"123",
 		})
@@ -92,7 +85,6 @@ func Connect(url string) {
 	} else {
 		fmt.Println("Connected!")
 	}
-
 }
 
 func InsertUser (username, password string) {
@@ -105,7 +97,7 @@ func InsertUser (username, password string) {
 	fmt.Println(Err)
 
 	if Err != nil {
-		Err = c.Insert(&User{Username: username, Password: password, Id: bson.NewObjectId()})
+		Err = c.Insert(&User{Username: username, Password: password})
 		fmt.Println(Err)
 
 	}
@@ -121,7 +113,7 @@ func GetBaseDevices () []BaseDevice {
 	Err := c.Find(nil).All(&devices)
 
 	if Err != nil {
-
+		fmt.Print(Err.Error())
 	}
 
 	return  devices
@@ -200,9 +192,6 @@ func DeleteRoom (room string) {
 }
 
 func UpdateState (room, device, state string) {
-
-	// TODO: Überprüfen, wieso device nach Update kein Array mehr ist
-
 	c := MongoSession.DB(DB).C("user")
 
 	var user User
@@ -216,31 +205,28 @@ func UpdateState (room, device, state string) {
 		},
 	}).One(&user)
 
-	var deviceToUpdate Device
+	var deviceIndex string
 
-	for _, v := range user.Room[0].Device  {
+	for i, v := range user.Room[0].Device  {
 		if v.Id == bson.ObjectIdHex(device) {
-			deviceToUpdate = v
+			deviceIndex = strconv.Itoa(i)
 		}
 	}
-
-	deviceToUpdate.State = state
 
 	query := bson.M{
 		"username": getUser(),
 		"room.id": bson.ObjectIdHex(room),
 	}
 
-	change := bson.M{"$set": bson.M{"room.$.device": deviceToUpdate}}
+	change := bson.M{
+		"$set": bson.M{
+			"room.$.device." + deviceIndex + ".state": state}}
 
 	Err := c.Update(query, change)
 
 	if Err != nil {
-		//fmt.Println(Err.Error())
-		fmt.Println(user)
-		//fmt.Println(change)
+		fmt.Println(Err.Error())
 	}
-
 }
 
 func InsertDevice (name, deviceType, room string) {
@@ -263,48 +249,5 @@ func InsertDevice (name, deviceType, room string) {
 
 	if Err != nil {
 		fmt.Println(Err.Error())
-	}
-}
-
-func GetAllUsernames () []User {
-	c := MongoSession.DB("tessera").C("users")
-
-	var result []User
-	Err = c.Find(bson.M{}).Sort("Username").All(&result)
-
-	return result
-}
-
-func GetRandomName() string {
-
-	var source = "1234567890abcdefghijklmnopqrstuvwxyz"
-	var buffer bytes.Buffer
-
-
-	for i := 0; i < 10; i++ {
-		buffer.WriteString(string(source[rand.Intn(len(source) - 5) + 5]))
-	}
-
-	return buffer.String()
-}
-
-func InsertEntity () {
-	c := MongoSession.DB(DB).C("baseDevice")
-
-	Err = c.Insert(BaseDevice{
-		Id: 	bson.NewObjectId(),
-		Name:	"Light",
-	},
-		BaseDevice{
-			Id: 	bson.NewObjectId(),
-			Name:	"Shutter",
-		},
-		BaseDevice{
-			Id: 	bson.NewObjectId(),
-			Name:	"Coffee machine",
-		})
-
-	if Err != nil {
-		fmt.Printf(Err.Error())
 	}
 }

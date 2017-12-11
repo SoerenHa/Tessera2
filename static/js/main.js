@@ -1,5 +1,9 @@
 "use strict";
 
+    (function() {
+        updateAllLights();
+    })();
+
     /****************************** Aliases ******************************/
     function select(element) {
         return document.querySelector(element);
@@ -20,22 +24,9 @@
 
             let room = this.closest('.roomContainer').querySelector('input[name="room"]').value;
             let device = this.closest('.device').querySelector('data').value;
-
             updateState(room, device, this.value);
         }
     });
-
-    // adjust stuff
-    // selectAll('.lightSlider').forEach(element => {
-    //     element.onchange = function() {
-    //         let light = this.closest('.device').querySelector('.light');
-    //         // light.style.opacity = (this.value / 100).toString();
-    //         light.style.filter = "grayscale(" + (1 - this.value / 100) + ")"
-    //     }
-    //
-    // });
-
-
 
 /****************************** Functions ******************************/
 
@@ -93,6 +84,13 @@
         })
     }
 
+    function updateAllLights() {
+        selectAll('.light').forEach(element => {
+            let light = element.closest('.device').querySelector('.light');
+            let value = element.closest('.device').querySelector('input').value;
+            light.style.filter = "grayscale(" + (1 - value / 100) + ")";
+        });
+    }
 
     // Adds text to an element and removes it after a short time
     function showInfo(element, text) {
