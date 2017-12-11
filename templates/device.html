@@ -1,18 +1,33 @@
 <div class="device">
-    {{if ( eq .Type "5a2c4464013c35122045d9a1") }}
-        <span>Light</span>
-        <span>
-            {{.Name}}
-        </span>
-    {{else if ( eq .Type "5a2c4464013c35122045d9a2") }}
-        <span>Shutter</span>
-        <span>
-            {{.Name}}
-        </span>
-    {{else if ( eq .Type "5a2c4464013c35122045d9a3") }}
-        <span>Coffee machine</span>
-        <span>
-            {{.Name}}
-        </span>
+    {{if ( eq .Type "5a2dcba6013c351964f4bfd3") }}
+        <data value="{{.Id.Hex}}"></data>
+        <div class="deviceOptions">
+            <div>{{.Name}}</div>
+            <input type="range" class="lightSlider" min="0" max="100" step="1">
+        </div>
+
+        <div class="deviceStatus">
+            <div class="light"></div>
+        </div>
+    {{else if ( eq .Type "5a2dcba6013c351964f4bfd4") }}
+        <div class="deviceOptions">
+            <div>{{.Name}}</div>
+            <input type="range" class="shutterSlider" min="0" max="100" step="1">
+        </div>
+
+        <div class="deviceStatus">
+            <div class="shutter"></div>
+        </div>
+    {{else if ( eq .Type "5a2dcba6013c351964f4bfd35") }}
+        <div>{{.Name}}</div>
+        <div>
+            <select>
+                <option value="default">Select beverage</option>
+                <option>Coffee</option>
+                <option>Espresso</option>
+                <option>Latte</option>
+                <option>Cacao</option>
+            </select>
+        </div>
     {{end}}
 </div>

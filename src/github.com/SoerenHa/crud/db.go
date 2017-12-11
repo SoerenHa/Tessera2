@@ -26,9 +26,10 @@ type BaseDevice struct {
 }
 
 type Device struct {
-	Id		bson.ObjectId
-	Name	string
+	Id		bson.ObjectId	`bson:"id",json:"id"`
+	Name	string			`bson:"name",json:"name"`
 	Type	string
+	State	string			`bson:"state",json:"state"`
 }
 
 type Room struct {
@@ -149,9 +150,6 @@ func GetRoomJson () []byte {
 	if Err != nil {
 		fmt.Print(Err.Error())
 	}
-
-	fmt.Print(string(json))
-
 	return json
 }
 
@@ -180,24 +178,8 @@ func InsertRoom (room string) {
 }
 
 func DeleteRoom (room string) {
-	//rooms := GetRooms()
-	//
 	c := MongoSession.DB(DB).C("user")
 
-	//query := bson.M{
-	//	"username": getUser(),
-	//	//"room.id": bson.ObjectIdHex(room),
-	//}
-
-	//update := bson.M{
-	//	"$pull": bson.M{
-	//		"room.$.name": "Fickraum"}}
-	//
-	//Err = c.Update(query,update)
-
-	//mjamm := bson.M{"$pull": bson.M{"room.$.id": bson.ObjectIdHex(room)}}
-
-	//var roomToDelete Room
 	var user User
 	c.Find(bson.M{
 		"username": getUser(),
@@ -212,18 +194,53 @@ func DeleteRoom (room string) {
 	var roomToDelete Room
 	if len(user.Room) > 0 {
 		roomToDelete = user.Room[0]
-		// TODO: Work.
 		c.Update(bson.M{"username": getUser()}, bson.M{"$pull": bson.M{"room": roomToDelete}})
 
 	}
+}
 
+func UpdateState (room, device, state string) {
 
-	fmt.Printf("%v",roomToDelete)
+	// TODO: Überprüfen, wieso device nach Update kein Array mehr ist
 
-	//var roomToDelete Room = Room{}
+	c := MongoSession.DB(DB).C("user")
 
+	var user User
+	c.Find(bson.M{
+		"username": getUser(),
+	}).Select(bson.M{
+		"room": bson.M{
+			"$elemMatch": bson.M{
+				"id": bson.ObjectIdHex(room),
+			},
+		},
+	}).One(&user)
 
-	//c.Update(query, mjamm)
+	var deviceToUpdate Device
+
+	for _, v := range user.Room[0].Device  {
+		if v.Id == bson.ObjectIdHex(device) {
+			deviceToUpdate = v
+		}
+	}
+
+	deviceToUpdate.State = state
+
+	query := bson.M{
+		"username": getUser(),
+		"room.id": bson.ObjectIdHex(room),
+	}
+
+	change := bson.M{"$set": bson.M{"room.$.device": deviceToUpdate}}
+
+	Err := c.Update(query, change)
+
+	if Err != nil {
+		//fmt.Println(Err.Error())
+		fmt.Println(user)
+		//fmt.Println(change)
+	}
+
 }
 
 func InsertDevice (name, deviceType, room string) {
@@ -239,8 +256,6 @@ func InsertDevice (name, deviceType, room string) {
 		"username": getUser(),
 		"room.id": bson.ObjectIdHex(room),
 	}
-
-	fmt.Print(query)
 
 	change := bson.M{"$addToSet": bson.M{"room.$.device": deviceStruct}}
 

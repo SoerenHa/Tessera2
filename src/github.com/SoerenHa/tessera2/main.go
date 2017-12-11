@@ -133,12 +133,30 @@ func test(w http.ResponseWriter, r *http.Request) {
 
 			break
 		case "getRooms":
-			fmt.Print("Request")
 			rooms := crud.GetRoomJson()
 			fmt.Print(rooms)
 			w.Header().Set("Content-Type", "application/json")
 			w.Write(rooms)
+			break
+		case "updateState":
+			room := r.FormValue("room")
+			device := r.FormValue("device")
+			state := r.FormValue("state")
 
+			fmt.Println(room)
+			fmt.Println(device)
+			fmt.Println(state)
+
+			crud.UpdateState(room, device, state)
+			w.Header().Set("Content-Type", "application/json")
+
+			test, _ := json.Marshal(struct {
+
+			}{})
+
+			w.Write(test)
+
+			break
 
 		}
 

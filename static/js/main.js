@@ -11,58 +11,33 @@
 
     /****************************** Events ******************************/
 
-    // select('#createRoom').onclick = function() {
-    //     let room = select('#roomName').value;
-    //     let infoSpan = select('#roomInfo');
-    //
-    //     if ( room !== '') {
-    //         let data = {
-    //             room: room,
-    //             action: 'insertRoom'
-    //         };
-    //
-    //         ajax({
-    //             method:     'POST',
-    //             data:       data,
-    //             success:    function (model) {
-    //                 showInfo(infoSpan, 'Room inserted');
-    //                 updateRooms();
-    //             }
-    //         })
-    //     } else {
-    //         showInfo(infoSpan, 'Please enter a room');
-    //     }
-    // };
+    // adjust grayscale of the light image
+    selectAll('.lightSlider').forEach(element => {
+        element.onchange = function() {
+            let light = this.closest('.device').querySelector('.light');
+            // light.style.opacity = (this.value / 100).toString();
+            light.style.filter = "grayscale(" + (1 - this.value / 100) + ")";
 
-    select('#createDevice').onclick = function() {
-        let type = select('#deviceType').value;
-        let name = select('#deviceName').value;
-        let infoSpan = select('#deviceInfo');
+            let room = this.closest('.roomContainer').querySelector('input[name="room"]').value;
+            let device = this.closest('.device').querySelector('data').value;
 
-        if ( type !== 'default' && name !== '' ) {
-            let data = {
-                type: type,
-                name: name,
-                action: "insertDevice"
-            };
-
-            ajax({
-                method: 'POST',
-                uri:    '',
-                data:   data,
-                success: function(model) {
-                    let text = "Insertion was successfull";
-                    showInfo(infoSpan, text);
-                }
-            });
-        } else if ( type === 'default' ) {
-            showInfo(infoSpan, 'Please select a device');
-        } else if ( name === '' ) {
-            showInfo(infoSpan, 'Please input a name');
+            updateState(room, device, this.value);
         }
-    };
+    });
 
-    /****************************** Functions ******************************/
+    // adjust stuff
+    // selectAll('.lightSlider').forEach(element => {
+    //     element.onchange = function() {
+    //         let light = this.closest('.device').querySelector('.light');
+    //         // light.style.opacity = (this.value / 100).toString();
+    //         light.style.filter = "grayscale(" + (1 - this.value / 100) + ")"
+    //     }
+    //
+    // });
+
+
+
+/****************************** Functions ******************************/
 
     function ajax(config) {
         // http://stackoverflow.com/a/15096979/570336
@@ -100,6 +75,24 @@
         xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhttp.send(serialize(config.data));
     }
+
+    function updateState(room, device, state) {
+        let data = {
+            room:   room,
+            device: device,
+            state:  state,
+            action: "updateState"
+        };
+
+        ajax({
+            method:     'POST',
+            data:       data,
+            success:    function (resp) {
+
+            }
+        })
+    }
+
 
     // Adds text to an element and removes it after a short time
     function showInfo(element, text) {
