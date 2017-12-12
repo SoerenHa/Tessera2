@@ -36,6 +36,21 @@
                 <input type="submit" value="Create device">
             </form>
         </div>
+
+        <!-- Scene Inputs -->
+        <div class="inputContainer">
+            <span class="containerHead">Scenes</span>
+            <form method="post">
+                <input type="hidden" name="action" value="insertScene">
+                <label for="">Select time:</label>
+                {{/*<input type="date" name="time" id="time">*/}}
+                <button type="button" class="timeButton" id="selectSunrise"></button>
+                <button type="button" class="timeButton" id="selectSunset"></button>
+                <button type="button" class="timeButton" id="selectTime"></button>
+
+            </form>
+
+        </div>
     </div>
 
     <div id="content">

@@ -10,6 +10,8 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"encoding/json"
 	"strconv"
+	"github.com/kelvins/sunrisesunset"
+	"time"
 )
 
 type User struct {
@@ -37,6 +39,11 @@ type Room struct {
 
 type RoomContainer struct {
 	Rooms []Room
+}
+
+type Times struct {
+	Sunrise	time.Time
+	Sunset	time.Time
 }
 
 const DB = "tohuus"
@@ -249,5 +256,27 @@ func InsertDevice (name, deviceType, room string) {
 
 	if Err != nil {
 		fmt.Println(Err.Error())
+	}
+}
+
+func GetTimes () Times {
+	timeData := sunrisesunset.Parameters{
+		Latitude:  54.774727032665766,
+		Longitude: 9.447391927242279,
+		UtcOffset: 1.0,
+		Date:      time.Now(),
+	}
+
+	sunrise, sunset, Err := timeData.GetSunriseSunset()
+
+	fmt.Print(sunrise)
+
+	if Err != nil {
+		fmt.Print(Err.Error())
+	}
+
+	return Times{
+		Sunrise: sunrise,
+		Sunset:	 sunset,
 	}
 }

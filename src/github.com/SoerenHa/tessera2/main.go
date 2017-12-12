@@ -46,9 +46,11 @@ type HeadTemplate struct {
 	Title string
 }
 
+
 type BodyTemplate struct {
-	BaseDevices		[]crud.BaseDevice
-	Rooms			[]crud.Room
+	BaseDevices	[]crud.BaseDevice
+	Rooms		[]crud.Room
+	Time		crud.Times
 }
 
 type RoomTemplate struct {
@@ -78,9 +80,12 @@ func test(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		devices :=crud.GetBaseDevices()
 		rooms := crud.GetRooms()
+		times := crud.GetTimes()
+
+		fmt.Print(times)
 
 		myTemplates.ExecuteTemplate(w, "head.html", HeadTemplate{})
-		myTemplates.ExecuteTemplate(w, "body.html", BodyTemplate{devices, rooms})
+		myTemplates.ExecuteTemplate(w, "body.html", BodyTemplate{devices, rooms, times})
 		myTemplates.ExecuteTemplate(w, "foot.html", BodyTemplate{})
 	}
 
