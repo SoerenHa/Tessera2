@@ -4,10 +4,10 @@
         <div class="inputContainer">
             <span class="containerHead">Rooms</span>
             <form method="post">
-                <input type="hidden" name="action" value="insertRoom">
+                <input type="hidden" name="action" class="fullWidth" value="insertRoom">
                 <label for="roomName">Room name:</label>
-                <input type="text" name="room" required>
-                <input type="submit" value="Create room">
+                <input type="text" name="room" class="fullWidth" required>
+                <input type="submit" class="fullWidth" value="Create room">
             </form>
         </div>
 
@@ -17,7 +17,7 @@
             <form method="post">
                 <input type="hidden" name="action" value="insertDevice">
                 <label for="deviceType">Choose type:</label>
-                <select id="deviceType" name="deviceType" required>
+                <select id="deviceType" name="deviceType" class="fullWidth" required>
                     <option value="default">Select device</option>
                     {{range .BaseDevices}}
                         <option value="{{.Type}}">{{.Type}}</option>
@@ -25,15 +25,15 @@
                 </select>
 
                 <label for="deviceRoom">Choose room:</label>
-                <select id="deviceRoom" name="deviceRoom" required>
+                <select id="deviceRoom" name="deviceRoom" class="fullWidth" required>
                     <option value="default">Select room</option>
                     {{range .Rooms}}
                         <option value="{{.Id.Hex}}">{{.Name}}</option>
                     {{end}}
                 </select>
                 <label for="deviceName">Device name:</label>
-                <input type="text" id="deviceName" name="deviceName" required>
-                <input type="submit" value="Create device">
+                <input type="text" id="deviceName" class="fullWidth" name="deviceName" required>
+                <input type="submit" class="fullWidth" value="Create device">
             </form>
         </div>
 
@@ -42,22 +42,58 @@
             <span class="containerHead">Scenes</span>
             <form method="post">
                 <input type="hidden" name="action" value="insertScene">
-                <label for="">Select time:</label>
-                {{/*<input type="date" name="time" id="time">*/}}
-                <button type="button" class="timeButton" id="selectSunrise"></button>
-                <button type="button" class="timeButton" id="selectSunset"></button>
-                <button type="button" class="timeButton" id="selectTime"></button>
-
+                <label for="sceneName">Select name:</label>
+                <input type="text" id="sceneName" name="sceneName" class="fullWidth" required>
+                <label for="sceneDate">Select date:</label>
+                <input type="date" id="sceneDate" name="sceneDate" class="fullWidth" required>
+                Select time:
+                <div>
+                    <button type="button" class="timeButton" id="selectSunrise"></button>
+                    <button type="button" class="timeButton" id="selectSunset"></button>
+                    <button type="button" class="timeButton" id="selectTime"></button>
+                </div>
+                <div>
+                    <input type="text" name="sunTime" class="fullWidth" style="display: none" readonly disabled>
+                    <input type="time" name="clockTime" class="fullWidth" style="display: none" disabled>
+                </div>
+                <div>
+                    <label for="offsetToggle">Offset(minutes):</label>
+                    <input type="checkbox" id="offsetToggle">
+                    <input type="number" name="offset" min="0" max="60" step="1" class="fullWidth" style="display: none" disabled>
+                </div>
+                <div>
+                    <label for="daily">Daily:</label>
+                    <input type="checkbox" name="daily" id="daily">
+                </div>
+                <input type="submit" class="fullWidth" value="Create scene">
             </form>
 
+        </div>
+
+        <div class="inputContainer">
+            <form method="post">
+                <input type="hidden" name="action" value="getXML">
+                <input type="submit">
+            </form>
         </div>
     </div>
 
     <div id="content">
-        {{range .Rooms}}
-            {{template "room.html" .}}
-        {{end}}
+        <div class="subContent">
+            <h2 class="fullWidth">Rooms</h2>
+            {{range .Rooms}}
+                {{template "room.html" .}}
+            {{end}}
+        </div>
+        <div class="subContent">
+            <h2 class="fullWidth">Scenes</h2>
+            {{range .Scenes}}
+                {{template "scene.html" .}}
+            {{end}}
+        </div>
     </div>
+
+
 
     <script type="text/javascript" src="/static/js/main.js"></script>
 </body>

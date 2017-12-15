@@ -1,13 +1,72 @@
 <div class="roomContainer">
-    <form method="post">
-        <input type="hidden" name="room" value="{{.Id.Hex}}">
-        <input type="hidden" name="action" value="deleteRoom">
-        <input type="submit" value="X">
-    </form>
+    {{$room := .Id.Hex}}
+    <img src="/static/images/edit.png" class="edit">
     <span class="containerHead">{{.Name}}</span>
     <ul class="devices">
-        {{range .Device}}
-            <li>{{template "device.html" .}}</li>
+        {{if .Device}}
+            {{range .Device}}
+                <li>{{template "device.html" .}}</li>
+            {{end}}
+        {{else}}
+             No devices
         {{end}}
     </ul>
+    <div class="overlay">
+        <div class="optionContainer">
+            <div>
+
+                <form method="post">
+                    <input type="hidden" name="room" value="{{$room}}">
+                    <input type="hidden" name="action" value="renameRoom">
+                    <label>
+                        Edit room:
+                        <input type="text" name="name" value="{{.Name}}">
+                    </label>
+                    <label>
+                        <img src="/static/images/edit.png" class="icon">
+                        <input type="submit" style="display: none">
+                    </label>
+                </form>
+
+                <form method="post">
+                    <input type="hidden" name="room" value="{{$room}}">
+                    <input type="hidden" name="action" value="deleteRoom">
+                    <label>
+                        <img src="/static/images/delete.png" class="icon">
+                        <input type="submit" style="display: none">
+                    </label>
+                </form>
+
+            </div>
+            {{range .Device}}
+                <div>
+
+                    <form method="post">
+                        <input type="hidden" name="device" value="{{.Id.Hex}}">
+                        <input type="hidden" name="room" value="{{$room}}">
+                        <input type="hidden" name="action" value="renameDevice">
+                        <label>
+                            Edit device:
+                            <input type="text" name="name" value="{{.Name}}">
+                        </label>
+                        <label>
+                            <img src="/static/images/edit.png" class="icon">
+                            <input type="submit" style="display: none">
+                        </label>
+                    </form>
+
+                    <form method="post">
+                        <input type="hidden" name="device" value="{{.Id.Hex}}">
+                        <input type="hidden" name="room" value="{{$room}}">
+                        <input type="hidden" name="action" value="deleteDevice">
+                        <label>
+                            <img src="/static/images/delete.png" class="icon">
+                            <input type="submit" style="display: none">
+                        </label>
+                    </form>
+
+                </div>
+            {{end}}
+        </div>
+    </div>
 </div>

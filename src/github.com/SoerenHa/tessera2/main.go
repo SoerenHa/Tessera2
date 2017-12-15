@@ -9,7 +9,11 @@ import (
 	"net/http"
 	"time"
 	"github.com/SoerenHa/crud"
+	"strconv"
+	"os"
+	"io"
 	"fmt"
+	"bufio"
 )
 
 func main() {
@@ -46,11 +50,10 @@ type HeadTemplate struct {
 	Title string
 }
 
-
 type BodyTemplate struct {
 	BaseDevices	[]crud.BaseDevice
 	Rooms		[]crud.Room
-	Time		crud.Times
+	Scenes		[]crud.Scene
 }
 
 type RoomTemplate struct {
@@ -77,15 +80,17 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 
 func test(w http.ResponseWriter, r *http.Request) {
 
+
+
 	if r.Method == "GET" {
 		devices :=crud.GetBaseDevices()
 		rooms := crud.GetRooms()
-		times := crud.GetTimes()
+		scenes := crud.GetScenes()
 
-		fmt.Print(times)
+
 
 		myTemplates.ExecuteTemplate(w, "head.html", HeadTemplate{})
-		myTemplates.ExecuteTemplate(w, "body.html", BodyTemplate{devices, rooms, times})
+		myTemplates.ExecuteTemplate(w, "body.html", BodyTemplate{devices, rooms, scenes})
 		myTemplates.ExecuteTemplate(w, "foot.html", BodyTemplate{})
 	}
 
@@ -105,10 +110,15 @@ func test(w http.ResponseWriter, r *http.Request) {
 			crud.InsertRoom(room)
 			http.Redirect(w, r, "http://localhost:9090/test", http.StatusFound)
 			break
+		case "renameRoom":
+			name := r.FormValue("name")
+			room := r.FormValue("room")
+			crud.RenameRoom(room, name)
+			http.Redirect(w, r, "http://localhost:9090/test", http.StatusFound)
+			break
 		case "deleteRoom":
 			crud.DeleteRoom(r.FormValue("room"))
 			http.Redirect(w, r, "http://localhost:9090/test", http.StatusFound)
-
 			break
 		case "insertDevice":
 			device := r.FormValue("deviceName")
@@ -119,9 +129,43 @@ func test(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "http://localhost:9090/test", http.StatusFound)
 
 			break
+		case "renameDevice":
+			name := r.FormValue("name")
+			room := r.FormValue("room")
+			device := r.FormValue("device")
+			crud.RenameDevice(room, device, name)
+			http.Redirect(w, r, "http://localhost:9090/test", http.StatusFound)
+			break
+		case "deleteDevice":
+			crud.DeleteDevice(r.FormValue("room"), r.FormValue("device"))
+			http.Redirect(w, r, "http://localhost:9090/test", http.StatusFound)
+			break
+		case "insertScene":
+			name := r.FormValue("sceneName")
+			date := r.FormValue("sceneDate")
+			offset, _ := strconv.Atoi(r.FormValue("offset"))
+			var daily bool
+			var dateTime time.Time
+
+			if r.FormValue("daily") == "on" {
+				daily = true
+			} else {
+				daily = false
+			}
+
+			if len(r.FormValue("sunTime")) > 0 {
+				// TODO; get Time od sunrise/sunset
+			} else if len(r.FormValue("clockTime")) > 0 {
+				sceneTime := r.FormValue("clockTime") + ":00+01:00"
+				dateTime, Err = time.Parse(time.RFC3339, date + "T" + sceneTime)
+			}
+
+			crud.InsertScene(name, "test", dateTime, offset, daily, true )
+
+			http.Redirect(w, r, "http://localhost:9090/test", http.StatusFound)
+			break
 		case "getRooms":
 			rooms := crud.GetRoomJson()
-			fmt.Print(rooms)
 			w.Header().Set("Content-Type", "application/json")
 			w.Write(rooms)
 			break
@@ -138,9 +182,32 @@ func test(w http.ResponseWriter, r *http.Request) {
 			}{})
 
 			w.Write(test)
-
 			break
+		case "getXML":
+			xml := crud.CreateXML()
 
+			f, Err := os.Create("tmp/test.xml")
+			if Err != nil {
+				fmt.Print(Err.Error())
+			}
+			defer f.Close()
+			wr := bufio.NewWriter(f)
+
+			fmt.Fprintf(wr, string(xml))
+			wr.Flush()
+
+			file, Err := os.OpenFile("tmp/test.xml", os.O_RDWR, 0644)
+
+			if Err != nil {
+				fmt.Print(Err.Error())
+			}
+
+			w.Header().Set("Content-Disposition", "attachment; filename=\"test.xml\"")
+			w.Header().Set("Content-Type", "tmp/text/xml")
+			io.Copy(w, file)
+			file.Close()
+			os.Remove("tmp/test.xml")
+			break
 		}
 	}
 }

@@ -3,31 +3,38 @@
         <data value="{{.Id.Hex}}"></data>
         <div class="deviceOptions">
             <div>{{.Name}}</div>
-            <input type="range" class="lightSlider" min="0" max="100" step="1" value="{{.State}}">
+            <input type="range" class="lightSlider" min="0" max="100" step="1" value="{{.State}}" title="Adjust brightness">
         </div>
 
         <div class="deviceStatus">
             <div class="light"></div>
         </div>
     {{else if ( eq .Type "Shutter") }}
+        <data value="{{.Id.Hex}}"></data>
         <div class="deviceOptions">
             <div>{{.Name}}</div>
-            <input type="range" class="shutterSlider" min="0" max="100" step="1">
+            <input type="range" class="shutterSlider" min="0" max="100" step="1" value="{{.State}}" title="Adjust degree of openess">
         </div>
 
         <div class="deviceStatus">
-            <div class="shutter"></div>
+            <div class="shutter">
+            </div>
         </div>
     {{else if ( eq .Type "Coffee machine") }}
-        <div>{{.Name}}</div>
-        <div>
-            <select>
-                <option value="default">Select beverage</option>
-                <option>Coffee</option>
-                <option>Espresso</option>
-                <option>Latte</option>
-                <option>Cacao</option>
+        <data value="{{.Id.Hex}}"></data>
+        <div class="deviceOptions">
+            <div>{{.Name}}</div>
+            <select class="coffeeSelect" title="Select a beverage">
+                <option value="default">Off</option>
+                <option value="Coffee">Coffee</option>
+                <option value="Espresso">Espresso</option>
+                <option value="Latte">Latte</option>
+                <option value="Cocoa">Cocoa</option>
             </select>
+        </div>
+
+        <div class="deviceStatus">
+            <div class="coffee"></div>
         </div>
     {{end}}
 </div>

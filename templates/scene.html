@@ -1,0 +1,12 @@
+<div class="roomContainer">
+    <span class="containerHead">{{.Name}}</span>
+    <data class="dateData" value="{{.Date}}"></data>
+
+    {{if .Action}}
+    <ul>
+        {{range .Action}}
+             <li></li>
+        {{end}}
+    </ul>
+    {{end}}
+</div>

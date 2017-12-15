@@ -5,6 +5,7 @@
 
 body {
     position: relative;
+    background: darkslategray;
 }
 
 input[type="range"] {
@@ -20,13 +21,12 @@ input[type="range"] {
 .inputContainer {
     width: 200px;
     padding: 5px;
-    margin: 5px;
     border: 2px solid black;
     border-radius: 5px;
     background-color: #a0b4b2;
 }
 
-.inputContainer input, select {
+.fullWidth {
     width: 100%;
 }
 
@@ -81,13 +81,41 @@ input[type="range"] {
     margin: auto;
 }
 
+.coffee {
+    background-image: url("/static/images/coffee.png");
+    background-size: contain;
+    border-radius: 50% !important;
+    height: 2em; width: 2em;
+    margin: auto;
+}
+
+/*noinspection ALL*/
+.shutter {
+    width: 48px;
+    height: 48px;
+    border:2px solid grey;
+    background-image: url("/static/images/shutter.png"), url("/static/images/cloud.png");
+    background-repeat: no-repeat, no-repeat;
+    background-position-y: top, bottom;
+    background-size: contain;
+}
+
 #content {
     position: absolute;
     left: 200px;
-
     display: flex;
-    flex-direction: row;
+    align-items: flex-start;
     flex-wrap: wrap;
+}
+
+.subContent {
+    width: 50%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    background: slategray;
+    border: 1px solid black;
+    border-radius: 5px;
 }
 
 #sideBar {
@@ -111,12 +139,57 @@ input[type="range"] {
     height: 48px;
 }
 
-#selectSunrise {
-    background: url("/static/images/sun.png") top 50px;
-
-
+.edit {
+    cursor: pointer;
+    height: 1.5em;
+    float: right;
 }
 
-body {
-    background-color: green;
+.icon {
+    height: 1.5em;
+    cursor: pointer;
+    background-color: white;
+}
+
+.overlay {
+    position: fixed;
+    display: none;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 2;
+}
+
+.optionContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background: white;
+    transform: translate(-50%,-50%);
+}
+
+.optionContainer > div {
+    display: flex;
+    border: 1px solid black;
+    margin: 5px;
+    padding: 5px;
+}
+
+#selectSunrise {
+    background: url("/static/images/sunrise.png") white;
+    background-size: contain;
+}
+
+#selectSunset {
+    background: url("/static/images/sunset.png") white;
+    background-size: contain;
+}
+
+#selectTime {
+    background: url("/static/images/clock.png") white;
+    background-size: contain;
 }
