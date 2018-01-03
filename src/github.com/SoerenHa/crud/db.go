@@ -1,19 +1,17 @@
 /*
-	Package db contains utility functions for working with the database
+	Package crud contains function for creating, reading, updating and deleting elements in the mongoDB
 */
 
 package crud
 
 import (
 	"fmt"
+	"time"
+	"strconv"
+	"math/rand"
+	"encoding/xml"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"encoding/json"
-	"strconv"
-	"github.com/kelvins/sunrisesunset"
-	"time"
-	"encoding/xml"
-	"math/rand"
 )
 
 type User struct {
@@ -21,6 +19,7 @@ type User struct {
 	Password	string	`xml:"password,omitempty"`
 	Room		[]Room	`xml:"rooms"`
 	Scene		[]Scene	`xml:"scenes"`
+	Simulator	Simulator
 }
 
 type BaseDevice struct {
@@ -28,17 +27,16 @@ type BaseDevice struct {
 }
 
 type Device struct {
-	Id		bson.ObjectId	`bson:"id",json:"id"`
-	Name	string			`bson:"name",json:"name"`
-	Type	string
-	State	string			`bson:"state",json:"state"`
+	Id		bson.ObjectId	`bson:"id",json:"id",xml:"id"`
+	Name	string			`bson:"name",json:"name",xml:"name"`
+	Type	string			`xml:"type"`
+	State	string			`bson:"state",json:"state",xml:"state"`
 }
 
 type Scene struct {
 	Id		bson.ObjectId
 	Name	string
-	Date	time.Time
-	Time	string
+	Time	time.Time
 	Offset	int
 	Daily	bool
 	Active	bool
@@ -60,12 +58,14 @@ type RoomContainer struct {
 	Rooms []Room
 }
 
-type Times struct {
-	Sunrise	time.Time
-	Sunset	time.Time
+type Simulator struct {
+	State		string			`bson:"state",json:"state"`
+	SimTime 	time.Time		`json:"simTime"`
+	TimeStep	time.Duration	`json:"timeStep"`
+
 }
 
-const DB = "tohuus"
+const DB = "HA17DB_Soeren_Hansen_550548"
 var MongoSession *mgo.Session
 var Err error
 
@@ -88,21 +88,23 @@ func getRoom (room string) Room {
 	return user.Room[0]
 }
 
-func getDeviceIndex(room, device string) string {
-	roomStruct := getRoom(room)
+func getDeviceIndex(device string) string {
+	rooms := GetRooms()
 
 	var deviceIndex string
 
-	for i, v := range roomStruct.Device  {
-		if v.Id == bson.ObjectIdHex(device) {
-			deviceIndex = strconv.Itoa(i)
+	for _, room := range rooms {
+		for i, v := range room.Device {
+			if v.Id == bson.ObjectIdHex(device) {
+				deviceIndex = strconv.Itoa(i)
+			}
 		}
 	}
 
 	return deviceIndex
 }
 
-func getUser () string {
+func getUser() string {
 	return "smarty"
 }
 
@@ -131,7 +133,13 @@ func getRandomDeviceWithAction () []Action {
 		for _, room := range selectedRooms {
 			for _, device := range room.Device {
 				var action string
-				if device.Type == "Light" || device.Type == "Shutter" {
+				if device.Type == "Light" {
+					if rng.Intn(2) == 1 {
+						action = "on"
+					} else {
+						action = "off"
+					}
+				} else if device.Type == "Shutter" {
 					action = strconv.Itoa(rng.Intn(100))
 				} else {
 					coffeeActions := [4]string{"Coffee", "Espresso", "Latte", "Cocoa"}
@@ -162,10 +170,42 @@ func contains(s []Room, e Room) bool {
 	return false
 }
 
+func deleteAction(deviceId string) {
+	c := MongoSession.DB(DB).C("user")
+
+	scenes := GetScenes()
+
+	for _, scene := range scenes {
+		for _, action := range scene.Action {
+			if deviceId == action.DeviceId {
+				query := bson.M{
+					"username": getUser(),
+					"scene.action.deviceid": deviceId,
+				}
+
+				change := bson.M{
+					"$pull": bson.M{
+						"scene.$.action": action,
+					},
+				}
+				Err := c.Update(query, change)
+
+				if Err != nil {
+					fmt.Println(Err.Error())
+				}
+			}
+		}
+	}
+}
+
 /******************** PUBLIC FUNCTIONS ********************/
 
-func Connect(url string) {
+func Connect (url string) {
 	MongoSession, Err = mgo.Dial(url)
+
+	if Err != nil {
+		panic(Err)
+	}
 
 	MongoSession.SetMode(mgo.Monotonic, true)
 
@@ -198,6 +238,10 @@ func Connect(url string) {
 		Err = c.Insert(User{
 			Username:	"smarty",
 			Password:	"123",
+			Simulator:	Simulator{
+				State:	"paused",
+				TimeStep: time.Second,
+			},
 		})
 	}
 
@@ -221,25 +265,6 @@ func GetUserData () User {
 	return user
 }
 
-func InsertUser (username, password string) {
-	c := MongoSession.DB(DB).C("users")
-	fmt.Println(Err)
-
-	var result User
-	Err = c.Find(bson.M{"name": username}).One(&result)
-
-	fmt.Println(Err)
-
-	if Err != nil {
-		Err = c.Insert(&User{Username: username, Password: password})
-		fmt.Println(Err)
-
-	}
-	if Err != nil {
-		panic(Err)
-	}
-}
-
 func GetBaseDevices () []BaseDevice {
 	c := MongoSession.DB(DB).C("baseDevice")
 
@@ -253,7 +278,6 @@ func GetBaseDevices () []BaseDevice {
 	return  devices
 }
 
-// Returns Array of Rooms
 func GetRooms () []Room {
 	c := MongoSession.DB(DB).C("user")
 
@@ -265,16 +289,6 @@ func GetRooms () []Room {
 	}
 
 	return result.Room
-}
-
-func GetRoomJson () []byte {
-	rooms := GetRooms()
-	json, Err := json.Marshal(rooms)
-
-	if Err != nil {
-		fmt.Print(Err.Error())
-	}
-	return json
 }
 
 func InsertRoom (room string) {
@@ -302,7 +316,7 @@ func RenameRoom (room, name string) {
 	//roomStruct.Name = name
 	query := bson.M{
 		"username": getUser(),
-		"room.id": bson.ObjectIdHex(room),
+		"room.id":  bson.ObjectIdHex(room),
 	}
 	c.Update(query, bson.M{"$set": bson.M{"room.$.name": name}})
 }
@@ -310,6 +324,11 @@ func RenameRoom (room, name string) {
 func DeleteRoom (room string) {
 	c := MongoSession.DB(DB).C("user")
 	roomToDelete := getRoom(room)
+
+	for _, device := range roomToDelete.Device {
+		deleteAction(device.Id.Hex())
+	}
+
 	c.Update(bson.M{"username": getUser()}, bson.M{"$pull": bson.M{"room": roomToDelete}})
 }
 
@@ -325,9 +344,11 @@ func DeleteDevice (room, device string) {
 		}
 	}
 
+	deleteAction(deviceToDelete.Id.Hex())
+
 	query := bson.M{
 		"username": getUser(),
-		"room.id": bson.ObjectIdHex(room),
+		"room.id":  bson.ObjectIdHex(room),
 	}
 
 	change := bson.M{
@@ -341,17 +362,16 @@ func DeleteDevice (room, device string) {
 	if Err != nil {
 		fmt.Println(Err.Error())
 	}
-
 }
 
-func RenameDevice (room, device, name string) {
+func RenameDevice (device, name string) {
 	c := MongoSession.DB(DB).C("user")
 
-	index := getDeviceIndex(room, device)
+	index := getDeviceIndex(device)
 
 	query := bson.M{
 		"username": getUser(),
-		"room.id": bson.ObjectIdHex(room),
+		"room.device.id": bson.ObjectIdHex(device),
 	}
 
 	change := bson.M{
@@ -365,19 +385,21 @@ func RenameDevice (room, device, name string) {
 	}
 }
 
-func UpdateState (room, device, state string) {
+func UpdateDeviceState(device, state string) {
 	c := MongoSession.DB(DB).C("user")
 
-	index := getDeviceIndex(room, device)
+	index := getDeviceIndex(device)
 
 	query := bson.M{
-		"username": getUser(),
-		"room.id": bson.ObjectIdHex(room),
+		"username":       getUser(),
+		"room.device.id": bson.ObjectIdHex(device),
 	}
 
 	change := bson.M{
 		"$set": bson.M{
-			"room.$.device." + index + ".state": state}}
+			"room.$.device." + index + ".state": state,
+		},
+	}
 
 	Err := c.Update(query, change)
 
@@ -389,15 +411,26 @@ func UpdateState (room, device, state string) {
 func InsertDevice (name, deviceType, room string) {
 	c := MongoSession.DB(DB).C("user")
 
+	var state string
+
+	if deviceType == "Light" {
+		state = "off"
+	} else if deviceType == "Shutter" {
+		state = "0"
+	} else {
+		state = "default"
+	}
+
 	deviceStruct := Device {
 		Id:		bson.NewObjectId(),
 		Name:	name,
 		Type:	deviceType,
+		State:	state,
 	}
 
 	query := bson.M{
 		"username": getUser(),
-		"room.id": bson.ObjectIdHex(room),
+		"room.id":  bson.ObjectIdHex(room),
 	}
 
 	change := bson.M{"$addToSet": bson.M{"room.$.device": deviceStruct}}
@@ -409,13 +442,25 @@ func InsertDevice (name, deviceType, room string) {
 	}
 }
 
-func InsertScene (name, time string, timestamp time.Time, offset int, daily, active bool) {
+func GetDevices() []Device {
+	rooms := GetRooms()
+	var devices []Device
+
+	for _, room := range rooms {
+		for _, device := range room.Device {
+			devices = append(devices, device)
+		}
+	}
+
+	return devices
+}
+
+func InsertScene (name string, time time.Time, offset int, daily, active bool) {
 	c := MongoSession.DB(DB).C("user")
 
 	scene := Scene{
 		Id:		bson.NewObjectId(),
 		Name:	name,
-		Date:	timestamp,
 		Time:	time,
 		Offset:	offset,
 		Daily:	daily,
@@ -447,36 +492,100 @@ func GetScenes () []Scene {
 }
 
 func CreateXML () []byte {
-	c := MongoSession.DB(DB).C("user")
-
-	var foo User
-	Err = c.Find(bson.M{"username": getUser()}).One(&foo)
-
-	xmlString, Err := xml.MarshalIndent(foo," ", "  ")
+	xmlData, Err := xml.MarshalIndent(GetRooms(),"", "  ")
+	xmlScenes, Err := xml.MarshalIndent(GetScenes(),"", "  ")
 
 	if Err != nil {
 		fmt.Print(Err.Error())
 	}
 
-	return xmlString
+	for _,x := range xmlScenes {
+		xmlData = append(xmlData, x)
+	}
+
+	return xmlData
 }
 
-func GetTimes () Times {
-	timeData := sunrisesunset.Parameters{
-		Latitude:  54.774727032665766,
-		Longitude: 9.447391927242279,
-		UtcOffset: 1.0,
-		Date:      time.Now(),
+func StartSimulation (fff int, simTime time.Time) {
+	c := MongoSession.DB(DB).C("user")
+
+	timestep := time.Duration(fff) * time.Second
+
+	query := bson.M{"username": getUser()}
+	change := bson.M{
+		"$set": bson.M{
+			"simulator.state": "running",
+			"simulator.simtime": simTime,
+			"simulator.timestep": timestep,
+		},
 	}
 
-	sunrise, sunset, Err := timeData.GetSunriseSunset()
+	Err = c.Update(query, change)
+
+	if Err != nil {
+		fmt.Println(Err.Error())
+	}
+}
+
+func GetSimulator () Simulator {
+	c := MongoSession.DB(DB).C("user")
+
+	var result User
+	Err = c.Find(bson.M{"username": getUser()}).Select(bson.M{"simulator": 1}).One(&result)
 
 	if Err != nil {
 		fmt.Print(Err.Error())
 	}
 
-	return Times{
-		Sunrise: sunrise,
-		Sunset:	 sunset,
+	return result.Simulator
+}
+
+func UpdateSimTime (simTime time.Time) {
+	c := MongoSession.DB(DB).C("user")
+
+	query := bson.M{"username": getUser()}
+	change := bson.M{
+		"$set": bson.M{
+			"simulator.simtime": simTime,
+		},
+	}
+
+	Err = c.Update(query, change)
+
+	if Err != nil {
+		fmt.Println(Err.Error())
+	}
+}
+
+func ToggleSimulator () string {
+	c := MongoSession.DB(DB).C("user")
+	sim := GetSimulator()
+	query := bson.M{"username": getUser()}
+	var change bson.M
+
+	if sim.State == "running" {
+		change = bson.M{
+			"$set": bson.M{
+				"simulator.state": "paused",
+			},
+		}
+	} else {
+		change = bson.M{
+			"$set": bson.M{
+				"simulator.state": "running",
+			},
+		}
+	}
+
+	Err = c.Update(query, change)
+
+	if Err != nil {
+		fmt.Println(Err.Error())
+	}
+
+	if sim.State == "running" {
+		return "paused"
+	} else {
+		return "running"
 	}
 }

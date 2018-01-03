@@ -1,12 +1,24 @@
-<div class="roomContainer">
-    <span class="containerHead">{{.Name}}</span>
-    <data class="dateData" value="{{.Date}}"></data>
-
-    {{if .Action}}
-    <ul>
-        {{range .Action}}
-             <li></li>
+{{$rooms := .Room}}
+{{range $key0, $s := .Scene}}
+    <div class="sceneContainer">
+        <span class="containerHead">{{.Name}}</span>
+        <data class="dateData" value="{{.Time}}"></data>
+        <div class="dateContainer">{{.Time}}</div>
+        <div>
+            {{if .Daily}}Executes daily{{end}}
+        </div>
+        {{if $s.Action}}
+            <ul>
+                {{range $key1, $a := $s.Action}}
+                    {{range $key2, $r := $rooms}}
+                        {{range $key3, $d := $r.Device}}
+                            {{if eq $d.Id.Hex $a.DeviceId}}
+                                <li>{{$d.Name}} switch to: {{$a.Action}}</li>
+                            {{end}}
+                        {{end}}
+                    {{end}}
+                {{end}}
+            </ul>
         {{end}}
-    </ul>
-    {{end}}
-</div>
+    </div>
+{{end}}

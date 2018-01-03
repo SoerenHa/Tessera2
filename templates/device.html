@@ -3,7 +3,14 @@
         <data value="{{.Id.Hex}}"></data>
         <div class="deviceOptions">
             <div>{{.Name}}</div>
-            <input type="range" class="lightSlider" min="0" max="100" step="1" value="{{.State}}" title="Adjust brightness">
+            <label>
+                On:
+                <input type="radio" name="lightState-{{.Id.Hex}}" value="on" {{if eq .State "on"}}checked{{end}}>
+            </label>
+            <label>
+                Off:
+                <input type="radio" name="lightState-{{.Id.Hex}}" value="off" {{if eq .State "off"}}checked{{end}}>
+            </label>
         </div>
 
         <div class="deviceStatus">
@@ -25,11 +32,11 @@
         <div class="deviceOptions">
             <div>{{.Name}}</div>
             <select class="coffeeSelect" title="Select a beverage">
-                <option value="default">Off</option>
-                <option value="Coffee">Coffee</option>
-                <option value="Espresso">Espresso</option>
-                <option value="Latte">Latte</option>
-                <option value="Cocoa">Cocoa</option>
+                <option value="default"     {{if eq .State "default"}}selected{{end}}>Off</option>
+                <option value="Coffee"      {{if eq .State "Coffee"}}selected{{end}}>Coffee</option>
+                <option value="Espresso"    {{if eq .State "Espresso"}}selected{{end}}>Espresso</option>
+                <option value="Latte"       {{if eq .State "Latte"}}selected{{end}}>Latte</option>
+                <option value="Cocoa"       {{if eq .State "Cocoa"}}selected{{end}}>Cocoa</option>
             </select>
         </div>
 

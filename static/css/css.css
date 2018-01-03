@@ -4,8 +4,25 @@
 }
 
 body {
+    margin: 0;
     position: relative;
-    background: darkslategray;
+    background: darkgrey;
+}
+
+#logo {
+    width: 200px;
+}
+
+header {
+    display: flex;
+    align-items: center;
+    border: 4px outset slategrey;
+    background-color: lightslategrey;
+}
+
+a {
+    border: 3px outset grey;
+    padding: 5px;
 }
 
 input[type="range"] {
@@ -15,14 +32,14 @@ input[type="range"] {
     border-radius: 5px;
     outline: none;
     cursor: pointer;
-
 }
+
+
 
 .inputContainer {
     width: 200px;
     padding: 5px;
-    border: 2px solid black;
-    border-radius: 5px;
+    border: 4px outset slategrey;
     background-color: #a0b4b2;
 }
 
@@ -30,15 +47,15 @@ input[type="range"] {
     width: 100%;
 }
 
-.roomContainer {
-    width: 200px;
+.roomContainer, .sceneContainer {
+    width: 210px;
     padding: 5px;
     border: 2px solid black;
-    border-radius: 5px;
-
-    margin: 5px;
-
     background-color: #a0b4b2;
+}
+
+.sceneContainer ul {
+    padding-left: 20px;
 }
 
 .devices {
@@ -49,14 +66,12 @@ input[type="range"] {
 .devices div {
     background-color: lightskyblue;
     padding: 2px;
-    border-radius: 5px;
 
 }
 
 .devices li {
     border: 1px solid grey;
-    border-radius: 5px;
-
+    margin: 2px 0 2px 0;
 }
 
 .device {
@@ -89,7 +104,6 @@ input[type="range"] {
     margin: auto;
 }
 
-/*noinspection ALL*/
 .shutter {
     width: 48px;
     height: 48px;
@@ -106,16 +120,17 @@ input[type="range"] {
     display: flex;
     align-items: flex-start;
     flex-wrap: wrap;
+    width: -moz-available;
 }
 
 .subContent {
+    min-width: 220px;
     width: 50%;
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
-    background: slategray;
-    border: 1px solid black;
-    border-radius: 5px;
+    background: lightslategrey;
+    border: 4px outset slategrey;
 }
 
 #sideBar {
@@ -192,4 +207,65 @@ input[type="range"] {
 #selectTime {
     background: url("/static/images/clock.png") white;
     background-size: contain;
+}
+
+/* Simulator Styles */
+h1 {
+    text-align: center;
+}
+
+.simButton {
+    width: 49%;
+}
+
+#simContainer {
+    min-width: 320px;
+    width: 400px;
+    margin: auto;
+    padding: 5px;
+    border: 5px outset lightsteelblue;
+    background-color: lightsteelblue;
+}
+
+#simContainer label {
+    display: flex;
+    justify-content: space-between;
+}
+
+#simTimeContainer {
+    font-size: 2em;
+    text-align: center;
+    background-color: cornflowerblue;
+}
+
+#simStateContainer {
+    font-size: 2em;
+    text-align: center;
+    border-radius: 5px;
+}
+
+@media only screen and (max-width: 400px) {
+    #sideBar {
+        position: unset;
+        width: 100%;
+    }
+
+    #content {
+        width: 100%;
+        position: unset;
+    }
+
+    .inputContainer, .subContent {
+        width: unset;
+    }
+
+    .roomContainer {
+        width: 100%;
+    }
+
+    body {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+    }
 }

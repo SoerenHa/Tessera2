@@ -1,0 +1,44 @@
+<body id="simBody">
+    <header>
+        <img src="/static/images/logo.png" id="logo">
+        <a href="/control">Control hub</a>
+    </header>
+    <div id="simContainer">
+        <h1>Simulator</h1>
+        <data id="simStateData" value="{{.Simulator.State}}"></data>
+        <div id="simStateContainer">
+            Simulatoin is {{.Simulator.State}}
+        </div>
+        <div id="simTimeContainer">
+        </div>
+        <div>
+            <label>
+                Select fast forward factor:
+                <input type="number" id="fastForward" min="1" max="300" step="1">
+            </label>
+        </div>
+        <div>
+            <label>
+                Select date and time:
+                <input type="date" id="simDate" value="">
+                <input type="time" id="simTime" value="">
+            </label>
+        </div>
+        <div>
+            <input type="button" class="simButton" value="Start">
+            <input type="button" class="simButton" value="Toggle">
+        </div>
+        <div id="xmlContainer" style="display: none">
+            <form method="post">
+                <input type="hidden" name="action" value="getXML">
+                <label>
+                    Download rooms and scenes as XML:
+                    <input type="submit" value="Download">
+                </label>
+            </form>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="/static/js/main.js"></script>
+</body>
+</html>
